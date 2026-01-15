@@ -3,6 +3,9 @@ name: LinkedIn AI Agent (Clean)
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write   # 👈 THIS IS THE FIX
+
 jobs:
   run-agent:
     runs-on: ubuntu-latest
