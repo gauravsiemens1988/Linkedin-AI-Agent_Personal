@@ -1,49 +1,94 @@
-name: LinkedIn AI Agent (Clean)
+import os
+from openai import OpenAI
 
-on:
-  workflow_dispatch:
-  # Optional: enable daily auto-run later
-  # schedule:
-  #   - cron: "0 3 * * *"   # 08:30 AM IST
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-permissions:
-  contents: write
+def generate_linkedin_post(title, source):
+    """
+    Generates infographic-style LinkedIn carousel content
+    along with ChatGPT-ready image prompts.
+    """
 
-jobs:
-  run-agent:
-    runs-on: ubuntu-latest
+    prompt = f"""
+You are a LinkedIn content strategist and infographic designer
+specializing in energy, sustainability, and infrastructure.
 
-    env:
-      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+TASK:
+Create an INFOGRAPHIC-STYLE LinkedIn carousel based on the news headline below.
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+NEWS HEADLINE:
+{title}
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
+CREATE EXACTLY 6 SLIDES.
 
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+For EACH slide provide:
+- Slide Heading (max 6 words)
+- Slide Text (max 12 words)
+- Visual Concept (icons / charts / illustration idea)
+- Image Prompt (for ChatGPT image generation)
 
-      - name: Run LinkedIn AI Agent
-        run: |
-          python main.py
+STYLE RULES:
+- Text must be short, visual, and infographic-friendly
+- No paragraphs
+- No emojis
+- No marketing language
+- Audience: CXOs, engineers, policymakers
+- Do NOT mention Google News or OpenAI
 
-      - name: Commit generated draft
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+FORMAT STRICTLY LIKE THIS:
 
-          git add drafts/ memory.json
-          git commit -m "Add generated LinkedIn draft" || echo "No changes to commit"
-          git push
+SLIDE 1
+Heading:
+Text:
+Visual:
+Image Prompt:
 
+SLIDE 2
+Heading:
+Text:
+Visual:
+Image Prompt:
 
+SLIDE 3
+Heading:
+Text:
+Visual:
+Image Prompt:
+
+SLIDE 4
+Heading:
+Text:
+Visual:
+Image Prompt:
+
+SLIDE 5
+Heading:
+Text:
+Visual:
+Image Prompt:
+
+SLIDE 6
+Heading:
+Text:
+Visual:
+Image Prompt:
+"""
+
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {
+                "role": "system",
+                "content": "You design clean, professional infographic carousels for LinkedIn."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+
+    return response.choices[0].message.content.strip()
 
 
 
