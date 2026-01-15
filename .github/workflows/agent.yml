@@ -4,11 +4,14 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write   # 👈 THIS IS THE FIX
+  contents: write
 
 jobs:
   run-agent:
     runs-on: ubuntu-latest
+
+    env:                     # 👈 THIS IS THE FIX
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
     steps:
       - name: Checkout repo
