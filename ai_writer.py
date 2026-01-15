@@ -1,9 +1,7 @@
 import os
-import google.generativeai as genai
+from google import genai
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-model = genai.GenerativeModel("gemini-1.5-flash")
+client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
 def generate_linkedin_post(title, source):
     prompt = f"""
@@ -15,12 +13,17 @@ Headline:
 Guidelines:
 - Start with a strong hook
 - Explain why this matters for the energy transition
-- Keep a professional, insightful tone
+- Use a professional, insightful tone
 - End with a thoughtful question
 - Add relevant hashtags
 - Do NOT mention Google News or Gemini
 """
 
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model="gemini-1.0-pro",
+        contents=prompt
+    )
+
     return response.text.strip()
+
 
