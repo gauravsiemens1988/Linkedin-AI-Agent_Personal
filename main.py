@@ -27,14 +27,16 @@ for item in news:
 
         # Create draft
         os.makedirs("drafts", exist_ok=True)
-        with open("drafts/draft.txt", "w", encoding="utf-8") as f:
-            f.write(
-                f"🚀 Green Energy Update\n\n"
-                f"{item['title']}\n\n"
-                f"Source: {item['source']}\n"
-                f"Link: {item['url']}\n\n"
-                f"#GreenEnergy #GreenHydrogen #Renewables"
-            )
+        from ai_writer import generate_linkedin_post
+
+post = generate_linkedin_post(item["title"], item["source"])
+
+os.makedirs("drafts", exist_ok=True)
+with open("drafts/draft.txt", "w", encoding="utf-8") as f:
+    f.write(post)
+
+print("📝 AI-written LinkedIn draft created")
+
 
         print("📝 Draft created in drafts/draft.txt")
         new_found = True
@@ -46,6 +48,7 @@ with open("memory.json", "w", encoding="utf-8") as f:
 
 if not new_found:
     print("ℹ️ No new news found (agent still working)")
+
 
 
 
