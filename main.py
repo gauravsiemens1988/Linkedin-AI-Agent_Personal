@@ -1,6 +1,7 @@
 import json
 import os
 from fetch_news import fetch_news
+from ai_writer import generate_linkedin_post
 
 print("🚀 LinkedIn AI Agent started")
 
@@ -17,6 +18,7 @@ else:
 
 # Detect new item
 new_found = False
+
 for item in news:
     if item["url"] not in memory:
         print("✅ New news detected:")
@@ -25,20 +27,16 @@ for item in news:
         # Save to memory
         memory[item["url"]] = True
 
-        # Create draft
+        # Generate AI LinkedIn draft
+        post = generate_linkedin_post(item["title"], item["source"])
+
+        # Save draft
         os.makedirs("drafts", exist_ok=True)
-        from ai_writer import generate_linkedin_post
+        with open("drafts/draft.txt", "w", encoding="utf-8") as f:
+            f.write(post)
 
-post = generate_linkedin_post(item["title"], item["source"])
+        print("📝 AI-written LinkedIn draft created in drafts/draft.txt")
 
-os.makedirs("drafts", exist_ok=True)
-with open("drafts/draft.txt", "w", encoding="utf-8") as f:
-    f.write(post)
-
-print("📝 AI-written LinkedIn draft created")
-
-
-        print("📝 Draft created in drafts/draft.txt")
         new_found = True
         break
 
@@ -48,6 +46,8 @@ with open("memory.json", "w", encoding="utf-8") as f:
 
 if not new_found:
     print("ℹ️ No new news found (agent still working)")
+
+
 
 
 
