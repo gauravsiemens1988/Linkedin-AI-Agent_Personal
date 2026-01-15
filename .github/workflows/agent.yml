@@ -1,4 +1,4 @@
-name: LinkedIn AI Agent (Clean Start)
+name: LinkedIn AI Agent (Clean)
 
 on:
   workflow_dispatch:
@@ -18,10 +18,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Run agent
         run: |
           python main.py
+
         
