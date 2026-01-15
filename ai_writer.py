@@ -1,33 +1,48 @@
-import os
-from openai import OpenAI
+name: LinkedIn AI Agent (Clean)
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+on:
+  workflow_dispatch:
+  # Optional: enable daily auto-run later
+  # schedule:
+  #   - cron: "0 3 * * *"   # 08:30 AM IST
 
-def generate_linkedin_post(title, source):
-    prompt = f"""
-Write a professional LinkedIn post (120–150 words) about the following green energy news.
+permissions:
+  contents: write
 
-Headline:
-{title}
+jobs:
+  run-agent:
+    runs-on: ubuntu-latest
 
-Guidelines:
-- Start with a strong hook
-- Explain why this matters for India’s energy transition
-- Keep a professional, insightful tone
-- End with a thoughtful question
-- Add relevant hashtags
-- Do NOT mention Google News or OpenAI
-"""
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are an expert LinkedIn content writer for the energy and sustainability sector."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    return response.choices[0].message.content.strip()
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run LinkedIn AI Agent
+        run: |
+          python main.py
+
+      - name: Commit generated draft
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+          git add drafts/ memory.json
+          git commit -m "Add generated LinkedIn draft" || echo "No changes to commit"
+          git push
+
 
 
 
