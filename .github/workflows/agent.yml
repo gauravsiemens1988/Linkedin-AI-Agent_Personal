@@ -10,8 +10,9 @@ jobs:
   run-agent:
     runs-on: ubuntu-latest
 
-    env:                     # 👈 THIS IS THE FIX
-      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+   env:
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
 
     steps:
       - name: Checkout repo
