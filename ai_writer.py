@@ -1,7 +1,9 @@
 import os
-from google import genai
+import google.generativeai as genai
 
-client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-pro")
 
 def generate_linkedin_post(title, source):
     prompt = f"""
@@ -19,11 +21,7 @@ Guidelines:
 - Do NOT mention Google News or Gemini
 """
 
-    response = client.models.generate_content(
-        model="gemini-1.5-flash",
-        contents=prompt
-    )
-
+    response = model.generate_content(prompt)
     return response.text.strip()
 
 
