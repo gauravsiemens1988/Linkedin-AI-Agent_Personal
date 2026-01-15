@@ -1,9 +1,7 @@
 import os
-import google.generativeai as genai
+from openai import OpenAI
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-model = genai.GenerativeModel("gemini-pro")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def generate_linkedin_post(title, source):
     prompt = f"""
@@ -18,11 +16,19 @@ Guidelines:
 - Keep a professional, insightful tone
 - End with a thoughtful question
 - Add relevant hashtags
-- Do NOT mention Google News or Gemini
+- Do NOT mention Google News or OpenAI
 """
 
-    response = model.generate_content(prompt)
-    return response.text.strip()
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are an expert LinkedIn content writer for the energy and sustainability sector."},
+            {"role": "user", "content": prompt}
+        ]
+    )
+
+    return response.choices[0].message.content.strip()
+
 
 
 
