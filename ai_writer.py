@@ -12,18 +12,19 @@ Headline:
 
 Guidelines:
 - Start with a strong hook
-- Explain why this matters for the energy transition
-- Use a professional, insightful tone
+- Explain why this matters for India’s energy transition
+- Keep a professional, insightful tone
 - End with a thoughtful question
 - Add relevant hashtags
 - Do NOT mention Google News or Gemini
 """
 
     response = client.models.generate_content(
-        model="gemini-1.0-pro",
+        model="gemini-1.5-flash",
         contents=prompt
     )
 
     return response.text.strip()
+
 
 
