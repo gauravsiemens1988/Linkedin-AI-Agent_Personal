@@ -1,31 +1,26 @@
 import os
-from openai import OpenAI
+import google.generativeai as genai
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 def generate_linkedin_post(title, source):
     prompt = f"""
-Write a professional LinkedIn post (120–150 words) about this green energy news.
+Write a professional LinkedIn post (120–150 words) about the following green energy news.
 
 Headline:
 {title}
 
 Guidelines:
 - Start with a strong hook
-- Explain why this matters for energy transition
-- Use a professional, insightful tone
+- Explain why this matters for the energy transition
+- Keep a professional, insightful tone
 - End with a thoughtful question
 - Add relevant hashtags
-
-Do NOT mention Google News explicitly.
+- Do NOT mention Google News or Gemini
 """
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are an expert LinkedIn content writer for energy and sustainability."},
-            {"role": "user", "content": prompt}
-        ]
-    )
+    response = model.generate_content(prompt)
+    return response.text.strip()
 
-    return response.choices[0].message.content.strip()
