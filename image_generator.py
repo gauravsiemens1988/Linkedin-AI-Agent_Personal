@@ -2,7 +2,7 @@ import replicate
 import os
 import requests
 
-MODEL = "stability-ai/sdxl-turbo"
+MODEL = "bytedance/sdxl-lightning-4step"
 
 def generate_image(prompt, output_path="drafts/images/slide_1.png"):
     token = os.getenv("REPLICATE_API_TOKEN")
@@ -11,18 +11,21 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
 
     client = replicate.Client(api_token=token)
 
-    print("🎨 Generating image with Stable Diffusion (SDXL Turbo)...")
+    print("🎨 Generating image with SDXL Lightning (Replicate)...")
 
     output = client.run(
         MODEL,
         input={
             "prompt": prompt,
-            "num_inference_steps": 4,   # turbo requires low steps
-            "guidance_scale": 2.0       # turbo optimized
+            "negative_prompt": "text, watermark, logo, blurry",
+            "num_inference_steps": 4,
+            "guidance_scale": 1.5,
+            "width": 1024,
+            "height": 576
         }
     )
 
-    # SDXL Turbo returns a list of image URLs
+    # Replicate returns list of image URLs
     image_url = output[0]
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -34,3 +37,4 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
         f.write(response.content)
 
     print("🖼️ Image saved to", output_path)
+
