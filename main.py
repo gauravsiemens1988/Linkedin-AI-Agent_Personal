@@ -1,5 +1,6 @@
 import os
 import json
+import feedparser
 from image_prompt_generator import generate_canva_style_prompt
 from image_generator import generate_image
 from presentation_builder import create_presentation
@@ -7,66 +8,77 @@ from presentation_builder import create_presentation
 print("🚀 LinkedIn AI Agent started")
 
 # --------------------------------------------------
-# LOAD LATEST NEWS (EXISTING FILE)
+# STEP 1: FETCH LATEST GREEN ENERGY NEWS
 # --------------------------------------------------
-NEWS_FILE = "latest_news.json"
-
-if not os.path.exists(NEWS_FILE):
-    print("❌ latest_news.json not found")
-    exit(0)
-
-with open(NEWS_FILE, "r", encoding="utf-8") as f:
-    news_items = json.load(f)
-
-if not news_items:
-    print("⚠️ No news items found")
-    exit(0)
-
-# Pick the FIRST article (latest)
-article = news_items[0]
-
-title = article.get("title", "Green Energy Update")
-summary = article.get(
-    "summary",
-    "India continues to strengthen its renewable energy ecosystem."
+RSS_URL = (
+    "https://news.google.com/rss/search?"
+    "q=green+energy+OR+solar+OR+wind+OR+hydrogen+OR+renewable"
+    "&hl=en-IN&gl=IN&ceid=IN:en"
 )
 
-print("📰 Article selected:")
+print("📰 Fetching latest green energy news...")
+feed = feedparser.parse(RSS_URL)
+
+news_items = []
+for entry in feed.entries[:5]:
+    news_items.append({
+        "title": entry.title,
+        "summary": entry.get("summary", entry.title),
+        "url": entry.link,
+        "source": "Google News"
+    })
+
+if not news_items:
+    print("⚠️ No news fetched, stopping agent")
+    exit(0)
+
+# Save for traceability
+with open("latest_news.json", "w", encoding="utf-8") as f:
+    json.dump(news_items, f, indent=2, ensure_ascii=False)
+
+print(f"✅ Fetched {len(news_items)} news items")
+
+# --------------------------------------------------
+# STEP 2: PICK LATEST ARTICLE
+# --------------------------------------------------
+article = news_items[0]
+title = article["title"]
+summary = article["summary"]
+
+print("🟢 Selected article:")
 print(title)
 
 # --------------------------------------------------
-# GENERATE CANVA-STYLE IMAGE PROMPT
+# STEP 3: GENERATE CANVA-STYLE IMAGE PROMPT
 # --------------------------------------------------
 prompt = generate_canva_style_prompt(title, summary)
 
 # --------------------------------------------------
-# AUTO-GENERATE IMAGE (STABLE DIFFUSION)
+# STEP 4: AUTO-GENERATE IMAGE (STABLE DIFFUSION)
 # --------------------------------------------------
 generate_image(prompt)
 
 # --------------------------------------------------
-# PREPARE SLIDE CONTENT
+# STEP 5: PREPARE SLIDE CONTENT
 # --------------------------------------------------
 slides_data = [
     {
         "title": title,
         "points": [
             summary,
-            "Strengthens India’s clean energy portfolio",
-            "Supports long-term renewable infrastructure",
+            "Strengthens India’s renewable energy ecosystem",
+            "Supports long-term clean power infrastructure"
         ]
     }
 ]
 
 # --------------------------------------------------
-# CREATE PRESENTATION
+# STEP 6: CREATE PRESENTATION
 # --------------------------------------------------
 pptx_path = create_presentation(slides_data)
 
 print(f"📊 Presentation generated: {pptx_path}")
 print("✅ LinkedIn AI Agent finished successfully")
-
-
 
 
 
