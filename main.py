@@ -1,5 +1,3 @@
-import os
-import json
 import feedparser
 from image_prompt_generator import generate_canva_style_prompt
 from image_generator import generate_image
@@ -8,7 +6,7 @@ from presentation_builder import create_presentation
 print("🚀 LinkedIn AI Agent started")
 
 # ---------------------------------------
-# Fetch latest green-energy news
+# Fetch latest green energy news
 # ---------------------------------------
 RSS_URL = (
     "https://news.google.com/rss/search?"
@@ -16,50 +14,67 @@ RSS_URL = (
     "&hl=en-IN&gl=IN&ceid=IN:en"
 )
 
-print("📰 Fetching latest green energy news...")
 feed = feedparser.parse(RSS_URL)
+article = feed.entries[0]
 
-news_items = []
-for entry in feed.entries[:5]:
-    news_items.append({
-        "title": entry.title,
-        "summary": entry.get("summary", entry.title),
-        "url": entry.link
-    })
-
-if not news_items:
-    print("⚠️ No news found")
-    exit(0)
-
-article = news_items[0]
-title = article["title"]
-summary = article["summary"]
+title = article.title
+summary = article.get("summary", title)
+link = article.link
 
 print("🟢 Selected article:")
 print(title)
 
 # ---------------------------------------
-# Generate Canva-style image prompt
+# Generate image prompt (semi-auto)
 # ---------------------------------------
 prompt = generate_canva_style_prompt(title, summary)
 generate_image(prompt)
 
 # ---------------------------------------
-# Slide content
+# Build LinkedIn carousel slides
 # ---------------------------------------
 slides_data = [
     {
         "title": title,
         "points": [
-            summary,
-            "Strategic boost to India’s renewable ecosystem",
-            "Supports long-term clean energy transition"
+            "Strategic joint venture in India’s clean energy sector"
+        ]
+    },
+    {
+        "title": "Key Highlights",
+        "points": [
+            "NTPC Green Energy approves a 50:50 JV with GAIL",
+            "Focus on renewable and clean energy projects",
+            "Strengthens public-sector collaboration"
+        ]
+    },
+    {
+        "title": "Why This Matters",
+        "points": [
+            "Accelerates India’s energy transition",
+            "Supports green hydrogen and renewables",
+            "Enhances long-term energy security"
+        ]
+    },
+    {
+        "title": "Industry Impact",
+        "points": [
+            "Boosts investor confidence in green energy",
+            "Encourages large-scale clean infrastructure",
+            "Aligns with India’s net-zero goals"
+        ]
+    },
+    {
+        "title": "Source",
+        "points": [
+            "India Infoline",
+            "Read full article online"
         ]
     }
 ]
 
 # ---------------------------------------
-# Build presentation
+# Create presentation
 # ---------------------------------------
 pptx_path = create_presentation(slides_data)
 
