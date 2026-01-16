@@ -6,49 +6,65 @@ from presentation_builder import create_presentation
 
 print("🚀 LinkedIn AI Agent started")
 
-# -----------------------------
-# LOAD ARTICLE
-# -----------------------------
-with open("latest_article.json", "r", encoding="utf-8") as f:
-    article = json.load(f)
+# --------------------------------------------------
+# LOAD LATEST NEWS (EXISTING FILE)
+# --------------------------------------------------
+NEWS_FILE = "latest_news.json"
 
-title = article["title"]
-summary = article.get("summary", title)
+if not os.path.exists(NEWS_FILE):
+    print("❌ latest_news.json not found")
+    exit(0)
 
-print("📰 Article detected:", title)
+with open(NEWS_FILE, "r", encoding="utf-8") as f:
+    news_items = json.load(f)
 
-# -----------------------------
-# GENERATE IMAGE PROMPT
-# -----------------------------
+if not news_items:
+    print("⚠️ No news items found")
+    exit(0)
+
+# Pick the FIRST article (latest)
+article = news_items[0]
+
+title = article.get("title", "Green Energy Update")
+summary = article.get(
+    "summary",
+    "India continues to strengthen its renewable energy ecosystem."
+)
+
+print("📰 Article selected:")
+print(title)
+
+# --------------------------------------------------
+# GENERATE CANVA-STYLE IMAGE PROMPT
+# --------------------------------------------------
 prompt = generate_canva_style_prompt(title, summary)
 
-# -----------------------------
-# GENERATE IMAGE (AUTO)
-# -----------------------------
+# --------------------------------------------------
+# AUTO-GENERATE IMAGE (STABLE DIFFUSION)
+# --------------------------------------------------
 generate_image(prompt)
 
-# -----------------------------
-# PREPARE SLIDES
-# -----------------------------
+# --------------------------------------------------
+# PREPARE SLIDE CONTENT
+# --------------------------------------------------
 slides_data = [
     {
         "title": title,
         "points": [
             summary,
-            "Strengthens India's clean energy ecosystem",
-            "Supports solar, wind and grid infrastructure"
+            "Strengthens India’s clean energy portfolio",
+            "Supports long-term renewable infrastructure",
         ]
     }
 ]
 
-# -----------------------------
+# --------------------------------------------------
 # CREATE PRESENTATION
-# -----------------------------
+# --------------------------------------------------
 pptx_path = create_presentation(slides_data)
 
-print("📊 Presentation generated:", pptx_path)
+print(f"📊 Presentation generated: {pptx_path}")
 print("✅ LinkedIn AI Agent finished successfully")
-
 
 
 
