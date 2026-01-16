@@ -1,94 +1,48 @@
 import os
+import json
 from openai import OpenAI
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-def generate_linkedin_post(title, source):
+def generate_slide_structure(title):
     """
-    Generates infographic-style LinkedIn carousel content
-    along with ChatGPT-ready image prompts.
+    Returns structured slide data in JSON format
     """
 
     prompt = f"""
-You are a LinkedIn content strategist and infographic designer
-specializing in energy, sustainability, and infrastructure.
-
-TASK:
-Create an INFOGRAPHIC-STYLE LinkedIn carousel based on the news headline below.
+From the news headline below, create a PRESENTATION structure.
 
 NEWS HEADLINE:
 {title}
 
-CREATE EXACTLY 6 SLIDES.
+OUTPUT JSON ONLY (no explanation, no markdown):
 
-For EACH slide provide:
-- Slide Heading (max 6 words)
-- Slide Text (max 12 words)
-- Visual Concept (icons / charts / illustration idea)
-- Image Prompt (for ChatGPT image generation)
+{{
+  "slides": [
+    {{
+      "title": "Slide title (max 6 words)",
+      "points": ["Point 1 (max 10 words)", "Point 2 (max 10 words)"]
+    }}
+  ]
+}}
 
-STYLE RULES:
-- Text must be short, visual, and infographic-friendly
-- No paragraphs
+RULES:
+- EXACTLY 6 slides
+- Max 2 bullet points per slide
+- Infographic / presentation tone
+- Professional, simple language
 - No emojis
-- No marketing language
-- Audience: CXOs, engineers, policymakers
-- Do NOT mention Google News or OpenAI
-
-FORMAT STRICTLY LIKE THIS:
-
-SLIDE 1
-Heading:
-Text:
-Visual:
-Image Prompt:
-
-SLIDE 2
-Heading:
-Text:
-Visual:
-Image Prompt:
-
-SLIDE 3
-Heading:
-Text:
-Visual:
-Image Prompt:
-
-SLIDE 4
-Heading:
-Text:
-Visual:
-Image Prompt:
-
-SLIDE 5
-Heading:
-Text:
-Visual:
-Image Prompt:
-
-SLIDE 6
-Heading:
-Text:
-Visual:
-Image Prompt:
 """
 
     response = client.chat.completions.create(
         model="gpt-4o-mini",
         messages=[
-            {
-                "role": "system",
-                "content": "You design clean, professional infographic carousels for LinkedIn."
-            },
-            {
-                "role": "user",
-                "content": prompt
-            }
+            {"role": "system", "content": "You create clean, professional presentation slides."},
+            {"role": "user", "content": prompt}
         ]
     )
 
-    return response.choices[0].message.content.strip()
+    return json.loads(response.choices[0].message.content.strip())
 
 
 
