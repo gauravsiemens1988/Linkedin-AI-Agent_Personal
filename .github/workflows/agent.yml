@@ -39,10 +39,10 @@ jobs:
       # Run LinkedIn AI Agent
       # -----------------------------
       - name: Run agent
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python main.py
+  env:
+    REPLICATE_API_TOKEN: ${{ secrets.REPLICATE_API_TOKEN }}
+  run: |
+    python main.py
 
       # -----------------------------
       # Commit & Push Generated Files (SAFE)
