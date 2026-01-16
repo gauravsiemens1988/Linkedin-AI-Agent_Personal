@@ -21,7 +21,7 @@ if os.path.exists(MEMORY_FILE):
             if content:
                 memory = json.loads(content)
     except Exception:
-        print("⚠️ memory.json was invalid. Resetting memory.")
+        print("⚠️ memory.json invalid, resetting.")
         memory = {}
 
 # -----------------------------
@@ -53,16 +53,6 @@ for item in news_items:
     memory[url] = True
 
     # -----------------------------
-    # CLEAR OLD IMAGES
-    # -----------------------------
-    if os.path.exists(IMAGE_FOLDER):
-        for file in os.listdir(IMAGE_FOLDER):
-            file_path = os.path.join(IMAGE_FOLDER, file)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-        print("🧹 Old images cleared")
-
-    # -----------------------------
     # GENERATE SLIDE STRUCTURE
     # -----------------------------
     slide_json = generate_slide_structure(
@@ -78,6 +68,7 @@ for item in news_items:
 
     # -----------------------------
     # CREATE PRESENTATION
+    # (USES EXISTING IMAGES)
     # -----------------------------
     pptx_path = create_presentation(
         slides_data=slides_data,
@@ -90,7 +81,7 @@ for item in news_items:
     break
 
 # -----------------------------
-# SAVE MEMORY (SAFE)
+# SAVE MEMORY
 # -----------------------------
 with open(MEMORY_FILE, "w", encoding="utf-8") as f:
     json.dump(memory, f, indent=2)
