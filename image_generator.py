@@ -1,40 +1,21 @@
-import replicate
 import os
-import requests
-
-MODEL = "bytedance/sdxl-lightning-4step"
 
 def generate_image(prompt, output_path="drafts/images/slide_1.png"):
-    token = os.getenv("REPLICATE_API_TOKEN")
-    if not token:
-        raise RuntimeError("REPLICATE_API_TOKEN not set")
+    """
+    Semi-automation mode:
+    - Writes image prompt
+    - User manually generates image in Canva / ChatGPT
+    - CI never fails
+    """
 
-    client = replicate.Client(api_token=token)
+    os.makedirs("drafts/images", exist_ok=True)
 
-    print("🎨 Generating image with SDXL Lightning (Replicate)...")
+    prompt_path = "drafts/images/image_prompt.txt"
+    with open(prompt_path, "w", encoding="utf-8") as f:
+        f.write(prompt)
 
-    output = client.run(
-        MODEL,
-        input={
-            "prompt": prompt,
-            "negative_prompt": "text, watermark, logo, blurry, distorted",
-            "num_inference_steps": 4,
-            "guidance_scale": 1.5,
-            "width": 1024,
-            "height": 576
-        }
-    )
-
-    # Replicate returns a list of image URLs
-    image_url = output[0]
-
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-
-    response = requests.get(image_url, timeout=120)
-    response.raise_for_status()
-
-    with open(output_path, "wb") as f:
-        f.write(response.content)
-
-    print("🖼️ Image saved to", output_path)
+    print("📝 Image prompt generated")
+    print("👉 Open drafts/images/image_prompt.txt")
+    print("👉 Generate image in Canva / ChatGPT")
+    print("👉 Save image as drafts/images/slide_1.png")
 
