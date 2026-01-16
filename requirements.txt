@@ -1,6 +1,8 @@
 feedparser
 openai
 python-pptx
+replicate
+
 
 
 
