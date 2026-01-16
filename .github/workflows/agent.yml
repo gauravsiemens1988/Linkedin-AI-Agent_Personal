@@ -34,14 +34,17 @@ jobs:
         run: |
           python main.py
 
-      - name: Commit generated draft
-        run: |
-          git config --global user.name "github-actions"
-          git config --global user.email "github-actions@github.com"
+     - name: Commit generated draft
+  run: |
+    git config --global user.name "github-actions"
+    git config --global user.email "github-actions@github.com"
 
-          git add drafts/ memory.json
-          git commit -m "Add generated LinkedIn draft" || echo "No changes to commit"
-          git push
+    # Pull latest changes first (IMPORTANT)
+    git pull origin main --rebase
+
+    git add drafts/ memory.json
+    git commit -m "Add generated LinkedIn draft" || echo "No changes to commit"
+    git push origin main
 
 
 
