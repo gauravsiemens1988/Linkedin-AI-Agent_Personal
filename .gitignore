@@ -1,0 +1,6 @@
+# Ignore runtime draft outputs
+drafts/*
+
+# Allow images used for PPT generation
+!drafts/images/
+!drafts/images/*.png
