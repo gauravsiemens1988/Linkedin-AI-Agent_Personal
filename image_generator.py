@@ -1,23 +1,35 @@
+import replicate
 import os
-from openai import OpenAI
+import requests
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+def generate_image(prompt, output_path="drafts/images/slide_1.png"):
+    token = os.getenv("REPLICATE_API_TOKEN")
+    if not token:
+        raise RuntimeError("REPLICATE_API_TOKEN not set")
 
-def generate_image(prompt, filename):
-    os.makedirs("drafts/images", exist_ok=True)
+    client = replicate.Client(api_token=token)
 
-    result = client.images.generate(
-        model="gpt-image-1",
-        prompt=prompt,
-        size="1024x1024"
+    print("🎨 Generating image with Stable Diffusion...")
+
+    output = client.run(
+        "stability-ai/sdxl",
+        input={
+            "prompt": prompt,
+            "width": 1024,
+            "height": 576,
+            "num_outputs": 1,
+            "guidance_scale": 7.5,
+            "num_inference_steps": 30
+        }
     )
 
-    image_base64 = result.data[0].b64_json
-    image_bytes = base64.b64decode(image_base64)
+    image_url = output[0]
 
-    file_path = f"drafts/images/{filename}"
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    with open(file_path, "wb") as f:
-        f.write(image_bytes)
+    img = requests.get(image_url).content
+    with open(output_path, "wb") as f:
+        f.write(img)
 
-    return file_path
+    print("🖼️ Image saved to", output_path)
+
