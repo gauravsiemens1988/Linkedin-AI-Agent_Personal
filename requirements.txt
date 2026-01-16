@@ -1,6 +1,5 @@
 feedparser
 python-pptx
-replicate
 requests
 
 
