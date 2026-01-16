@@ -44,12 +44,24 @@ for item in news_items:
     print("✅ New article detected:")
     print(title)
 
-    # Mark article as processed
+    # -----------------------------
+    # MARK ARTICLE AS PROCESSED
+    # -----------------------------
     memory[url] = True
 
     # -----------------------------
+    # CLEAR OLD IMAGES (CRITICAL FIX)
+    # -----------------------------
+    if os.path.exists(IMAGE_FOLDER):
+        for file in os.listdir(IMAGE_FOLDER):
+            file_path = os.path.join(IMAGE_FOLDER, file)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        print("🧹 Old images cleared")
+
+    # -----------------------------
     # GENERATE SLIDE STRUCTURE
-    # (TITLE + SUMMARY → FACT-BASED SLIDES)
+    # (FACT-BASED, FROM ARTICLE SUMMARY)
     # -----------------------------
     slide_json = generate_slide_structure(
         title=title,
@@ -64,6 +76,7 @@ for item in news_items:
 
     # -----------------------------
     # CREATE PRESENTATION
+    # (USES ONLY CURRENT IMAGES)
     # -----------------------------
     pptx_path = create_presentation(
         slides_data=slides_data,
@@ -85,6 +98,7 @@ if not new_item_found:
     print("ℹ️ No new news found")
 
 print("✅ LinkedIn AI Agent finished successfully")
+
 
 
 
