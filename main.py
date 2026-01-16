@@ -11,7 +11,7 @@ MEMORY_FILE = "memory.json"
 IMAGE_FOLDER = "drafts/images"
 
 # -----------------------------
-# LOAD MEMORY
+# LOAD MEMORY (AVOID DUPLICATES)
 # -----------------------------
 if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
@@ -28,11 +28,12 @@ print(f"📰 Fetched {len(news_items)} news items")
 new_item_found = False
 
 # -----------------------------
-# PROCESS NEW ARTICLE
+# PROCESS FIRST NEW ARTICLE
 # -----------------------------
 for item in news_items:
     url = item.get("url")
     title = item.get("title")
+    summary = item.get("summary", "")
 
     if not url or not title:
         continue
@@ -48,8 +49,13 @@ for item in news_items:
 
     # -----------------------------
     # GENERATE SLIDE STRUCTURE
+    # (TITLE + SUMMARY → FACT-BASED SLIDES)
     # -----------------------------
-    slide_json = generate_slide_structure(title)
+    slide_json = generate_slide_structure(
+        title=title,
+        summary=summary
+    )
+
     slides_data = slide_json.get("slides", [])
 
     if not slides_data:
@@ -61,7 +67,7 @@ for item in news_items:
     # -----------------------------
     pptx_path = create_presentation(
         slides_data=slides_data,
-        image_folder=IMAGE_FOLDER  # one image per slide
+        image_folder=IMAGE_FOLDER
     )
 
     print(f"📊 Presentation generated: {pptx_path}")
