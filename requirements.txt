@@ -2,6 +2,8 @@ feedparser
 openai
 python-pptx
 replicate
+requests
+
 
 
 
