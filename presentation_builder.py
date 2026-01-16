@@ -2,68 +2,49 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 import os
 
-def create_presentation(
-    slides_data,
-    image_folder="drafts/images",
-):
+def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
     prs = Presentation()
-    layout = prs.slide_layouts[1]  # Title + Content (stable)
 
-    base_dir = os.getcwd()
-    image_folder_path = os.path.join(base_dir, image_folder)
+    for idx, slide_data in enumerate(slides_data):
+        slide = prs.slides.add_slide(prs.slide_layouts[5])  # blank layout
 
-    print("DEBUG: image_folder_path =", image_folder_path)
+        # -------------------------
+        # Title
+        # -------------------------
+        title_box = slide.shapes.add_textbox(
+            Inches(0.5), Inches(0.3), Inches(9), Inches(1)
+        )
+        title_tf = title_box.text_frame
+        title_tf.text = slide_data["title"]
+        title_tf.paragraphs[0].font.size = Pt(28)
 
-    image_path = None
-    if os.path.exists(image_folder_path):
-        for f in sorted(os.listdir(image_folder_path)):
-            if f.lower().endswith(".png"):
-                image_path = os.path.join(image_folder_path, f)
-                break
-
-    print("DEBUG: resolved image_path =", image_path)
-
-    for slide_data in slides_data:
-        slide = prs.slides.add_slide(layout)
-
-        # ---------- TITLE ----------
-        title = slide.shapes.title
-        short_title = slide_data["title"].split(" - ")[0][:60]
-        title.text = short_title
-        title.text_frame.paragraphs[0].font.size = Pt(32)
-        title.text_frame.paragraphs[0].font.bold = True
-
-        # ---------- CONTENT ----------
-        content = slide.placeholders[1]
-        tf = content.text_frame
-        tf.clear()
-
-        # ---------- IMAGE ----------
-        if image_path and os.path.exists(image_path):
+        # -------------------------
+        # Image only on first slide
+        # -------------------------
+        if idx == 0 and os.path.exists(image_path):
             slide.shapes.add_picture(
                 image_path,
-                Inches(1),
-                Inches(2),
-                width=prs.slide_width - Inches(2),
-                height=Inches(3.5)
+                Inches(0.5),
+                Inches(1.3),
+                width=Inches(9)
             )
-        else:
-            tf.text = "Image will appear here (add slide_1.png)"
 
-        # ---------- BULLETS ----------
-        for point in slide_data["points"][:3]:
+        # -------------------------
+        # Bullet points
+        # -------------------------
+        content_box = slide.shapes.add_textbox(
+            Inches(0.8), Inches(4.5), Inches(8.5), Inches(2)
+        )
+        tf = content_box.text_frame
+        tf.clear()
+
+        for point in slide_data["points"]:
             p = tf.add_paragraph()
             p.text = point
-            p.font.size = Pt(16)
-            p.level = 1
+            p.font.size = Pt(18)
+            p.level = 0
 
     os.makedirs("drafts", exist_ok=True)
     output_path = "drafts/linkedin_carousel.pptx"
     prs.save(output_path)
-
-    print("DEBUG: PPT saved at", output_path)
     return output_path
-
-
-
-
