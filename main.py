@@ -8,20 +8,28 @@ from presentation_builder import create_presentation
 print("🚀 LinkedIn AI Agent started")
 
 MEMORY_FILE = "memory.json"
+IMAGE_FOLDER = "drafts/images"
 
-# Load memory
+# -----------------------------
+# LOAD MEMORY
+# -----------------------------
 if os.path.exists(MEMORY_FILE):
     with open(MEMORY_FILE, "r", encoding="utf-8") as f:
         memory = json.load(f)
 else:
     memory = {}
 
-# Fetch news
+# -----------------------------
+# FETCH NEWS
+# -----------------------------
 news_items = fetch_news()
 print(f"📰 Fetched {len(news_items)} news items")
 
 new_item_found = False
 
+# -----------------------------
+# PROCESS NEW ARTICLE
+# -----------------------------
 for item in news_items:
     url = item.get("url")
     title = item.get("title")
@@ -35,21 +43,25 @@ for item in news_items:
     print("✅ New article detected:")
     print(title)
 
-    # Mark as processed
+    # Mark article as processed
     memory[url] = True
 
-    # Generate slide structure
+    # -----------------------------
+    # GENERATE SLIDE STRUCTURE
+    # -----------------------------
     slide_json = generate_slide_structure(title)
-    slides_data = slide_json["slides"]
+    slides_data = slide_json.get("slides", [])
 
-    # Optional image (use first generated image if exists)
-    image_path = None
-    if os.path.exists("drafts/images/slide_1.png"):
-        image_path = "drafts/images/slide_1.png"
+    if not slides_data:
+        print("⚠️ No slide data generated")
+        break
 
+    # -----------------------------
+    # CREATE PRESENTATION
+    # -----------------------------
     pptx_path = create_presentation(
         slides_data=slides_data,
-        image_path=image_path
+        image_folder=IMAGE_FOLDER  # one image per slide
     )
 
     print(f"📊 Presentation generated: {pptx_path}")
@@ -57,7 +69,9 @@ for item in news_items:
     new_item_found = True
     break
 
-# Save memory
+# -----------------------------
+# SAVE MEMORY
+# -----------------------------
 with open(MEMORY_FILE, "w", encoding="utf-8") as f:
     json.dump(memory, f, indent=2)
 
@@ -65,6 +79,7 @@ if not new_item_found:
     print("ℹ️ No new news found")
 
 print("✅ LinkedIn AI Agent finished successfully")
+
 
 
 
