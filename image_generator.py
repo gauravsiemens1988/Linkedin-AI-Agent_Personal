@@ -17,7 +17,7 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
         MODEL,
         input={
             "prompt": prompt,
-            "negative_prompt": "text, watermark, logo, blurry",
+            "negative_prompt": "text, watermark, logo, blurry, distorted",
             "num_inference_steps": 4,
             "guidance_scale": 1.5,
             "width": 1024,
@@ -25,12 +25,12 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
         }
     )
 
-    # Replicate returns list of image URLs
+    # Replicate returns a list of image URLs
     image_url = output[0]
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    response = requests.get(image_url, timeout=60)
+    response = requests.get(image_url, timeout=120)
     response.raise_for_status()
 
     with open(output_path, "wb") as f:
