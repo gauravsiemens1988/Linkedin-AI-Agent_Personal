@@ -11,13 +11,18 @@ MEMORY_FILE = "memory.json"
 IMAGE_FOLDER = "drafts/images"
 
 # -----------------------------
-# LOAD MEMORY (AVOID DUPLICATES)
+# LOAD MEMORY (SAFE)
 # -----------------------------
+memory = {}
 if os.path.exists(MEMORY_FILE):
-    with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-        memory = json.load(f)
-else:
-    memory = {}
+    try:
+        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+            content = f.read().strip()
+            if content:
+                memory = json.loads(content)
+    except Exception:
+        print("⚠️ memory.json was invalid. Resetting memory.")
+        memory = {}
 
 # -----------------------------
 # FETCH NEWS
@@ -44,13 +49,11 @@ for item in news_items:
     print("✅ New article detected:")
     print(title)
 
-    # -----------------------------
-    # MARK ARTICLE AS PROCESSED
-    # -----------------------------
+    # Mark article as processed
     memory[url] = True
 
     # -----------------------------
-    # CLEAR OLD IMAGES (CRITICAL FIX)
+    # CLEAR OLD IMAGES
     # -----------------------------
     if os.path.exists(IMAGE_FOLDER):
         for file in os.listdir(IMAGE_FOLDER):
@@ -61,7 +64,6 @@ for item in news_items:
 
     # -----------------------------
     # GENERATE SLIDE STRUCTURE
-    # (FACT-BASED, FROM ARTICLE SUMMARY)
     # -----------------------------
     slide_json = generate_slide_structure(
         title=title,
@@ -76,7 +78,6 @@ for item in news_items:
 
     # -----------------------------
     # CREATE PRESENTATION
-    # (USES ONLY CURRENT IMAGES)
     # -----------------------------
     pptx_path = create_presentation(
         slides_data=slides_data,
@@ -89,7 +90,7 @@ for item in news_items:
     break
 
 # -----------------------------
-# SAVE MEMORY
+# SAVE MEMORY (SAFE)
 # -----------------------------
 with open(MEMORY_FILE, "w", encoding="utf-8") as f:
     json.dump(memory, f, indent=2)
