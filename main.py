@@ -1,97 +1,60 @@
-import json
 import os
-
-from fetch_news import fetch_news
-from ai_writer import generate_slide_structure
+import json
+from image_prompt_generator import generate_canva_style_prompt
 from presentation_builder import create_presentation
 
 print("🚀 LinkedIn AI Agent started")
 
-MEMORY_FILE = "memory.json"
-IMAGE_FOLDER = "drafts/images"
+# -----------------------------
+# LOAD ARTICLE (SAFE)
+# -----------------------------
+article_file = "latest_article.json"
+
+if not os.path.exists(article_file):
+    print("❌ latest_article.json not found")
+    exit(0)
+
+with open(article_file, "r", encoding="utf-8") as f:
+    article = json.load(f)
+
+title = article.get("title", "Green Energy Update")
+summary = article.get("summary", "India continues to expand its renewable energy capacity.")
+
+print("📰 Article:", title)
 
 # -----------------------------
-# LOAD MEMORY (SAFE)
+# GENERATE CANVA IMAGE PROMPT
 # -----------------------------
-memory = {}
-if os.path.exists(MEMORY_FILE):
-    try:
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            content = f.read().strip()
-            if content:
-                memory = json.loads(content)
-    except Exception:
-        print("⚠️ memory.json invalid, resetting.")
-        memory = {}
+prompt = generate_canva_style_prompt(title, summary)
+
+os.makedirs("drafts/images", exist_ok=True)
+
+with open("drafts/images/image_prompt.txt", "w", encoding="utf-8") as f:
+    f.write(prompt)
+
+print("🎨 Canva image prompt saved")
 
 # -----------------------------
-# FETCH NEWS
+# PREPARE SLIDE CONTENT
 # -----------------------------
-news_items = fetch_news()
-print(f"📰 Fetched {len(news_items)} news items")
-
-new_item_found = False
-
-# -----------------------------
-# PROCESS FIRST NEW ARTICLE
-# -----------------------------
-for item in news_items:
-    url = item.get("url")
-    title = item.get("title")
-    summary = item.get("summary", "")
-
-    if not url or not title:
-        continue
-
-    if url in memory:
-        continue
-
-    print("✅ New article detected:")
-    print(title)
-
-    # Mark article as processed
-    memory[url] = True
-
-    # -----------------------------
-    # GENERATE SLIDE STRUCTURE
-    # -----------------------------
-    slide_json = generate_slide_structure(
-        title=title,
-        summary=summary
-    )
-
-    slides_data = slide_json.get("slides", [])
-
-    if not slides_data:
-        print("⚠️ No slide data generated")
-        break
-
-    # -----------------------------
-    # CREATE PRESENTATION
-    # (USES EXISTING IMAGES)
-    # -----------------------------
-    pptx_path = create_presentation(
-        slides_data=slides_data,
-        image_folder=IMAGE_FOLDER
-    )
-
-    print(f"📊 Presentation generated: {pptx_path}")
-
-    new_item_found = True
-    break
+slides_data = [
+    {
+        "title": title,
+        "points": [
+            summary,
+            "Strengthens India's renewable energy portfolio",
+            "Supports solar, wind & grid infrastructure"
+        ]
+    }
+]
 
 # -----------------------------
-# SAVE MEMORY
+# CREATE PRESENTATION
 # -----------------------------
-with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-    json.dump(memory, f, indent=2)
+pptx_path = create_presentation(slides_data)
 
-if not new_item_found:
-    print("ℹ️ No new news found")
-
+print(f"📊 Presentation generated: {pptx_path}")
 print("✅ LinkedIn AI Agent finished successfully")
-
-
 
 
 
