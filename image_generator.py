@@ -2,6 +2,11 @@ import replicate
 import os
 import requests
 
+SDXL_MODEL = (
+    "stability-ai/sdxl:"
+    "39ed52f2a78e934b3ba6e2a89f5eec4c4d2a4f9dfb64e7b9a6c2d9f96c9c8a7b"
+)
+
 def generate_image(prompt, output_path="drafts/images/slide_1.png"):
     token = os.getenv("REPLICATE_API_TOKEN")
     if not token:
@@ -9,17 +14,17 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
 
     client = replicate.Client(api_token=token)
 
-    print("🎨 Generating image with Stable Diffusion...")
+    print("🎨 Generating image with Stable Diffusion (SDXL)...")
 
     output = client.run(
-        "stability-ai/sdxl",
+        SDXL_MODEL,
         input={
             "prompt": prompt,
             "width": 1024,
             "height": 576,
             "num_outputs": 1,
             "guidance_scale": 7.5,
-            "num_inference_steps": 30
+            "num_inference_steps": 30,
         }
     )
 
@@ -27,9 +32,11 @@ def generate_image(prompt, output_path="drafts/images/slide_1.png"):
 
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
-    img = requests.get(image_url).content
+    response = requests.get(image_url, timeout=60)
+    response.raise_for_status()
+
     with open(output_path, "wb") as f:
-        f.write(img)
+        f.write(response.content)
 
     print("🖼️ Image saved to", output_path)
 
