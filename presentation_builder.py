@@ -9,13 +9,25 @@ def create_presentation(
     logo_path="assets/logo_watermark.png"
 ):
     prs = Presentation()
-    layout = prs.slide_layouts[1]  # Title + Content (SAFE)
+    layout = prs.slide_layouts[1]  # Title + Content (MOST STABLE)
 
+    # -----------------------------
+    # RESOLVE PATHS (CRITICAL)
+    # -----------------------------
     base_dir = os.getcwd()
     image_folder_path = os.path.join(base_dir, image_folder)
 
+    print("DEBUG: base_dir =", base_dir)
+    print("DEBUG: image_folder_path =", image_folder_path)
+
+    if os.path.exists(image_folder_path):
+        print("DEBUG: image folder exists")
+        print("DEBUG: files in image folder =", os.listdir(image_folder_path))
+    else:
+        print("DEBUG: image folder DOES NOT EXIST")
+
     # -----------------------------
-    # FIND FIRST IMAGE (MANDATORY)
+    # PICK FIRST IMAGE
     # -----------------------------
     image_path = None
     if os.path.exists(image_folder_path):
@@ -24,9 +36,12 @@ def create_presentation(
                 image_path = os.path.join(image_folder_path, f)
                 break
 
-    print(f"DEBUG: Image path resolved -> {image_path}")
+    print("DEBUG: resolved image_path =", image_path)
 
-    for slide_data in slides_data:
+    # -----------------------------
+    # CREATE SLIDES
+    # -----------------------------
+    for idx, slide_data in enumerate(slides_data, start=1):
         slide = prs.slides.add_slide(layout)
 
         # -----------------------------
@@ -45,24 +60,26 @@ def create_presentation(
         tf.clear()
 
         # -----------------------------
-        # INSERT IMAGE *INSIDE PLACEHOLDER*
+        # IMAGE INSIDE PLACEHOLDER (SAFE)
         # -----------------------------
         if image_path and os.path.exists(image_path):
             content.insert_picture(image_path)
+            print(f"DEBUG: Image inserted on slide {idx}")
         else:
-            tf.text = "⚠️ Image missing"
+            tf.text = "⚠️ Image missing (not found in runner)"
+            print(f"DEBUG: Image NOT inserted on slide {idx}")
 
         # -----------------------------
-        # ADD BULLETS BELOW IMAGE
+        # BULLET POINTS (LIMITED)
         # -----------------------------
         for point in slide_data["points"][:4]:
             p = tf.add_paragraph()
             p.text = point
-            p.level = 1
             p.font.size = Pt(16)
+            p.level = 1
 
         # -----------------------------
-        # LOGO WATERMARK
+        # LOGO WATERMARK (OPTIONAL)
         # -----------------------------
         logo_full = os.path.join(base_dir, logo_path)
         if os.path.exists(logo_full):
@@ -73,11 +90,16 @@ def create_presentation(
                 width=Inches(1.4)
             )
 
+    # -----------------------------
+    # SAVE PRESENTATION
+    # -----------------------------
     os.makedirs("drafts", exist_ok=True)
-    output = "drafts/linkedin_carousel.pptx"
-    prs.save(output)
+    output_path = os.path.join("drafts", "linkedin_carousel.pptx")
+    prs.save(output_path)
 
-    return output
+    print("DEBUG: Presentation saved at", output_path)
+
+    return output_path
 
 
 
