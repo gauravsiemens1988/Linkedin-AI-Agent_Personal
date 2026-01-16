@@ -5,35 +5,45 @@ import os
 def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
     prs = Presentation()
 
+    # Resolve absolute image path
+    base_dir = os.getcwd()
+    abs_image_path = os.path.join(base_dir, image_path)
+
+    print("DEBUG: image path =", abs_image_path)
+    print("DEBUG: image exists =", os.path.exists(abs_image_path))
+
     for idx, slide_data in enumerate(slides_data):
-        slide = prs.slides.add_slide(prs.slide_layouts[5])  # blank layout
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # TRUE blank slide
 
         # -------------------------
         # Title
         # -------------------------
         title_box = slide.shapes.add_textbox(
-            Inches(0.5), Inches(0.3), Inches(9), Inches(1)
+            Inches(0.5), Inches(0.3), Inches(9), Inches(0.9)
         )
         title_tf = title_box.text_frame
+        title_tf.clear()
         title_tf.text = slide_data["title"]
         title_tf.paragraphs[0].font.size = Pt(28)
+        title_tf.paragraphs[0].font.bold = True
 
         # -------------------------
-        # Image only on first slide
+        # Image ONLY on first slide
         # -------------------------
-        if idx == 0 and os.path.exists(image_path):
+        if idx == 0 and os.path.exists(abs_image_path):
             slide.shapes.add_picture(
-                image_path,
+                abs_image_path,
                 Inches(0.5),
                 Inches(1.3),
                 width=Inches(9)
             )
+            print("DEBUG: image added to slide 1")
 
         # -------------------------
-        # Bullet points
+        # Bullet content
         # -------------------------
         content_box = slide.shapes.add_textbox(
-            Inches(0.8), Inches(4.5), Inches(8.5), Inches(2)
+            Inches(0.8), Inches(4.8), Inches(8.5), Inches(1.8)
         )
         tf = content_box.text_frame
         tf.clear()
@@ -47,4 +57,6 @@ def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
     os.makedirs("drafts", exist_ok=True)
     output_path = "drafts/linkedin_carousel.pptx"
     prs.save(output_path)
+
+    print("DEBUG: presentation saved at", output_path)
     return output_path
