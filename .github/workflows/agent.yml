@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # IMPORTANT: allows pull --rebase
+          fetch-depth: 0   # REQUIRED for rebase
 
       # -----------------------------
       # Setup Python
@@ -45,19 +45,25 @@ jobs:
           python main.py
 
       # -----------------------------
-      # Commit & Push Generated Files
+      # Commit & Push Generated Files (SAFE)
       # -----------------------------
       - name: Commit generated draft
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
 
-          # Always pull latest changes first
+          # Stash generated changes to allow rebase
+          git stash push -u || echo "Nothing to stash"
+
+          # Pull latest changes safely
           git pull origin main --rebase
 
+          # Restore generated files
+          git stash pop || echo "Nothing to pop"
+
+          # Commit & push if there are changes
           git add drafts/ memory.json
           git commit -m "Add generated LinkedIn draft" || echo "No changes to commit"
-
           git push origin main
 
         
