@@ -2,33 +2,37 @@ from pptx import Presentation
 from pptx.util import Inches, Pt
 import os
 
-def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
+def create_presentation(slides_data, image_folder="drafts/images"):
     prs = Presentation()
-
     base_dir = os.getcwd()
-    abs_image_path = os.path.join(base_dir, image_path)
 
-    print("DEBUG: image path =", abs_image_path)
-    print("DEBUG: image exists =", os.path.exists(abs_image_path))
+    for idx, slide_data in enumerate(slides_data, start=1):
+        slide = prs.slides.add_slide(prs.slide_layouts[6])  # blank slide
 
-    for idx, slide_data in enumerate(slides_data):
-        slide = prs.slides.add_slide(prs.slide_layouts[6])  # TRUE blank
+        # ----------------------------------
+        # Resolve image path for this slide
+        # ----------------------------------
+        image_name = f"slide_{idx}.png"
+        image_path = os.path.join(base_dir, image_folder, image_name)
 
-        # -------------------------
-        # IMAGE FIRST (only slide 1)
-        # -------------------------
-        if idx == 0 and os.path.exists(abs_image_path):
+        print(f"DEBUG: Slide {idx} image path =", image_path)
+        print(f"DEBUG: Exists =", os.path.exists(image_path))
+
+        # ----------------------------------
+        # Insert image IF available
+        # ----------------------------------
+        if os.path.exists(image_path):
             slide.shapes.add_picture(
-                abs_image_path,
+                image_path,
                 Inches(0.5),
                 Inches(1.2),
                 width=Inches(9)
             )
-            print("DEBUG: image added to slide 1")
+            print(f"DEBUG: Image added on slide {idx}")
 
-        # -------------------------
-        # TITLE (TOP, NO OVERLAP)
-        # -------------------------
+        # ----------------------------------
+        # Title
+        # ----------------------------------
         title_box = slide.shapes.add_textbox(
             Inches(0.5), Inches(0.3), Inches(9), Inches(0.8)
         )
@@ -38,9 +42,9 @@ def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
         title_tf.paragraphs[0].font.size = Pt(28)
         title_tf.paragraphs[0].font.bold = True
 
-        # -------------------------
-        # TEXT CONTENT (BELOW IMAGE)
-        # -------------------------
+        # ----------------------------------
+        # Text content
+        # ----------------------------------
         content_box = slide.shapes.add_textbox(
             Inches(0.8), Inches(5.2), Inches(8.5), Inches(1.6)
         )
@@ -57,5 +61,6 @@ def create_presentation(slides_data, image_path="drafts/images/slide_1.png"):
     output_path = "drafts/linkedin_carousel.pptx"
     prs.save(output_path)
 
-    print("DEBUG: presentation saved at", output_path)
+    print("DEBUG: Presentation saved at", output_path)
     return output_path
+
